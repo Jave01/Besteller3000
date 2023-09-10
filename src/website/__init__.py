@@ -51,27 +51,37 @@ def create_app(db_name="database.db"):
     db_dir = os.path.join(basedir, db_name)
     config_dir = os.path.join(basedir, "..", "config.json")
 
+    # load config file
     try:
         with open(config_dir, "r") as f:
             data = json.load(f)
             missing = is_config_valid(data)
-            if missing: 
-                raise ValueError(f"Config file not complete. Missing key: {missing}") 
-            
+            if missing:
+                raise ValueError(
+                    f"Config file not complete. Missing key: {missing}")
             for key, val in data.items():
                 if key == "UPLOAD_FOLDER":
                     # upload folder is [main.py-location]/[upload_folder]/
-                    app.config["UPLOAD_FOLDER"] = os.path.join(basedir, "..", val)
+                    app.config["UPLOAD_FOLDER"] = os.path.join(
+                        basedir, "..", val)
                 else:
                     app.config[key] = val
-                    
+
+            # load default templates
+            from .models import Template
+            # for template in data["default_templates"]:
+            #     new_template = Template(data=template)
+            #     db.session.add(new_template)
+            #     db.session.commit()
+
     except FileNotFoundError:
-        raise FileNotFoundError("Create a config.json file in the main directory")
+        raise FileNotFoundError(
+            "Create a config.json file in the main directory")
 
     app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + db_dir
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = True
-    # max incoming request size 16MB
-    app.config["MAX_CONTENT_LENGTH"] = 16 * 1024 * 1024
+    # max incoming request size 1kB
+    app.config["MAX_CONTENT_LENGTH"] = 1 * 1024
     app.config["JSON_AS_ASCII"] = False
 
     db.init_app(app)

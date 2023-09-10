@@ -1,7 +1,8 @@
+<!DOCTYPE html>
 {% extends "base.html" %} {% block head_additions %}
 <link rel="stylesheet" href="../static/styles/overview.css" />
 {% endblock %} {% block title %}Overview{% endblock %} {% block content %}
-<h1>Heroes Overview</h1>
+<h1>Overview</h1>
 <input
     type="hidden"
     id="csrf_token"
@@ -9,30 +10,105 @@
     value="{{ csrf_token() }}"
 />
 <section class="my-4">
-    <p>Upload new heroes:</p>
-    <form method="POST" enctype="multipart/form-data">
-        {{ form.csrf_token }}
-        <div class="input-group">
-            {{ form.files(class="form-control") }} {{ form.hidden_tag() }} {{
-            form.submit(class="input-group-text") }}
+    <nav>
+        <div class="nav nav-tabs" id="nav-tab" role="tablist">
+            <button
+                class="nav-link active"
+                id="nav-host-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#nav-host"
+                type="button"
+                role="tab"
+                aria-controls="nav-host"
+                aria-selected="true"
+            >
+                Host
+            </button>
+            <button
+                class="nav-link"
+                id="nav-join-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#nav-Join"
+                type="button"
+                role="tab"
+                aria-controls="nav-Join"
+                aria-selected="false"
+            >
+                Join
+            </button>
         </div>
-    </form>
-</section>
-<hr class="mx-auto my-5" />
-<p class="mb-0">Your heroes:</p>
-<div class="d-grid gap-3 pt-3">
-    {% for hero in user.heroes %}
-    <div class="p-2 bg-light border rounded hero-deletable" role="hero">
-        {{ hero.name }}
-        <input
-            type="button"
-            class="btn-close btn-delete-hero"
-            id="{{ hero.secure_name }}"
-        />
+    </nav>
+    <div class="tab-content" id="nav-tabContent">
+        <div
+            class="tab-pane fade show active"
+            id="nav-host"
+            role="tabpanel"
+            aria-labelledby="nav-host-tab"
+        >
+            <input
+                type="text"
+                id="group-name"
+                class="form-control my-3 small-width"
+                placeholder="Group name"
+                aria-label="Group name"
+                maxlength="50"
+            />
+
+            <label for="#template-selection">Choose a template:</label>
+            <select
+                class="form-select mb-4 small-width"
+                airia-label="Template selection"
+                id="template-selection"
+            >
+                {% if current_user.template %} {% for template in
+                current_user.templates %}
+                <option value="{{template.name}}">{{template.name}}</option>
+                {% endfor %} {% else %}
+                <option value="-1">No Templates found</option>
+                {% endif %}
+            </select>
+
+            <button
+                class="btn btn-outline-secondary btn-overview-ctrl"
+                type="button"
+                id="btn-host"
+            >
+                Host
+            </button>
+        </div>
+
+        <div
+            class="tab-pane fade"
+            id="nav-Join"
+            role="tabpanel"
+            aria-labelledby="nav-Join-tab"
+        >
+            <form method="POST">
+                <input
+                    type="hidden"
+                    name="csrf_token"
+                    value="{{ csrf_token() }}"
+                />
+                <div class="input-group my-3">
+                    <input
+                        type="text"
+                        class="form-control"
+                        placeholder="Enter group ID"
+                        aria-label="Enter group ID"
+                        aria-describedby="button-addon2"
+                    />
+                    <button
+                        class="btn btn-outline-secondary btn-overview-ctrl"
+                        type="submit"
+                        id="btn-join"
+                    >
+                        Join
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
-    {% endfor %}
-</div>
-<br />
+</section>
 
 {% endblock %} {% block additional_scripts %}
 <script

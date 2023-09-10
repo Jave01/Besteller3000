@@ -25,7 +25,7 @@ def valid_char_set(string: str, allowed_charset: set):
     return string.issubset(allowed_charset)
 
 
-def username_valid(username:str):
+def username_valid(username: str):
     secure_uname = secure_filename(username)
 
     if not valid_char_set(username, UNAME_CHARS):
@@ -69,10 +69,11 @@ def logout():
 @auth.route('/sign-up', methods=['GET', 'POST'])
 def sign_up():
     if request.method == "POST":
-        username = request.form.get('username')  # id must match the 'name' attribute in the html file
-        # email = request.form.get('email')     # not used yet   
+        # id must match the 'name' attribute in the html file
+        username = request.form.get('username')
+        # email = request.form.get('email')     # not used yet
         password = request.form.get('password')
-        # confPassword = request.form.get('confPassword')
+        confPassword = request.form.get('confPassword')
 
         user = User.query.filter_by(username=username).first()
 
@@ -85,15 +86,22 @@ def sign_up():
             flash(username_error_msg, category="error")
         elif len(password) > 100:
             flash("Password is too long", category='error')
+        elif password != confPassword:
+            flash('Passwords are not matching', category='error')
         elif not passwd_valid:
             flash(f'Invalid chars in password', category='error')
-        # elif password != confPassword:
-        #     flash('Passwords are not matching', category='error')
         else:
             # personal files get stored in a folder named [USER_FOLDER]/user_[username]
-            personal_folder = os.path.join(app.config['USER_FOLDER'], 'user_' + username)
+            personal_folder = os.path.join(
+                app.config['USER_FOLDER'], 'user_' + username)
             Path(personal_folder).mkdir(parents=True, exist_ok=True)
-            new_user = User(username=username, password=generate_password_hash(password, method='sha256'), personal_folder=personal_folder, access_lvl=Level.USER)
+            new_user = User(username=username,
+                            password=generate_password_hash(
+                                password, method='sha256'),
+                            personal_folder=personal_folder,
+                            access_lvl=Level.USER,
+                            templates=app.config['default_templates'])
+            # new_user.templates.extend(app.config['default_templates'])
             db.session.add(new_user)
             db.session.commit()
             login_user(new_user, remember=True)
@@ -101,4 +109,3 @@ def sign_up():
             return redirect(url_for('views.home'))
 
     return render_template("sign-up.html", user=current_user)
-

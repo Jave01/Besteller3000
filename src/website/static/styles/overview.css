@@ -1,3 +1,13 @@
 .hero-deletable .btn-close {
-  float: right;
+    float: right;
+}
+
+.btn-overview-ctrl {
+    width: 10%;
+    min-width: 70px;
+}
+
+.small-width {
+    width: 30%;
+    min-width: 18rem;
 }
